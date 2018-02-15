@@ -1,19 +1,19 @@
 package redis.migration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lambdaworks.redis.ReadFrom;
 import com.lambdaworks.redis.RedisException;
 import com.lambdaworks.redis.RedisURI;
 import com.lambdaworks.redis.cluster.ClusterClientOptions;
-import com.lambdaworks.redis.cluster.ClusterTopologyRefreshOptions;
 import com.lambdaworks.redis.cluster.RedisClusterClient;
 import com.lambdaworks.redis.cluster.api.StatefulRedisClusterConnection;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
+import redis.migration.config.CopyConfig;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by s.aravind on 21/01/18.
@@ -29,17 +29,11 @@ public class CopyRedisCluster {
     public CopyRedisCluster(Pair<String, Integer> srcCluster, Pair<String, Integer> destinationCluster) {
         srcRedisClusterClient =
                 RedisClusterClient.create(RedisURI.create(srcCluster.getKey(), srcCluster.getValue()));
-        ClusterTopologyRefreshOptions topologyRefreshOptions =
-                ClusterTopologyRefreshOptions.builder()
-                        .enablePeriodicRefresh(5, TimeUnit.SECONDS)
-                        .enableAllAdaptiveRefreshTriggers()
-                        .build();
         ClusterClientOptions clusterClientOptions = ClusterClientOptions.builder()
-                .topologyRefreshOptions(topologyRefreshOptions)
                 .build();
         srcRedisClusterClient.setOptions(clusterClientOptions);
         srcClusterConnection = srcRedisClusterClient.connect();
-
+        srcClusterConnection.setReadFrom(ReadFrom.SLAVE);
         destRedisClusterClient =
                 RedisClusterClient.create(RedisURI.create(destinationCluster.getKey(), destinationCluster.getValue()));
         destRedisClusterClient.setOptions(clusterClientOptions);
@@ -62,9 +56,27 @@ public class CopyRedisCluster {
         byte[] metaBytes = srcClusterConnection.sync().dump(metaKey);
         byte[] lznBytes = srcClusterConnection.sync().dump(lznKey);
 
-        destClusterConnection.sync().restore(offerIdKey, 0, offerIdBytes);
-        destClusterConnection.sync().restore(metaKey, 0, metaBytes);
-        destClusterConnection.sync().restore(lznKey, 0, lznBytes);
+        if (offerIdBytes != null) {
+            Boolean exists = destClusterConnection.sync().exists(offerIdKey);
+            if (exists) {
+                destClusterConnection.sync().del(offerIdKey);
+            }
+            destClusterConnection.sync().restore(offerIdKey, 0, offerIdBytes);
+        }
+        if (metaBytes != null) {
+            Boolean exists = destClusterConnection.sync().exists(metaKey);
+            if (exists) {
+                destClusterConnection.sync().del(metaKey);
+            }
+            destClusterConnection.sync().restore(metaKey, 0, metaBytes);
+        }
+        if (lznBytes != null) {
+            Boolean exists = destClusterConnection.sync().exists(lznKey);
+            if (exists) {
+                destClusterConnection.sync().del(lznKey);
+            }
+            destClusterConnection.sync().restore(lznKey, 0, lznBytes);
+        }
     }
 
     public void close() throws Exception {
@@ -77,6 +89,7 @@ public class CopyRedisCluster {
     public void copyListings(String fileName) throws Exception {
         BufferedReader bufferedReader = new BufferedReader(new FileReader(fileName));
         String key = null;
+        System.out.println("Jsdfas");
         int idx = 0;
         while ((key = bufferedReader.readLine()) != null) {
             if (key != null && key.startsWith("L")) {
@@ -85,6 +98,7 @@ public class CopyRedisCluster {
             }
             idx++;
             if (idx % 1000 == 0) {
+                System.out.println("key " + key);
                 log.info("Completed " + idx + " listings copy");
             }
         }

@@ -4,10 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.lambdaworks.redis.*;
 import com.lambdaworks.redis.api.StatefulRedisConnection;
-import com.lambdaworks.redis.cluster.api.sync.RedisAdvancedClusterCommands;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
-import org.rnorth.ducttape.unreliables.Unreliables;
+import redis.migration.config.DeleteConfig;
 
 import java.io.BufferedReader;
 import java.io.File;

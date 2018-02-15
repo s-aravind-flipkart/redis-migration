@@ -1,4 +1,4 @@
-package redis.migration;
+package redis.migration.config;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

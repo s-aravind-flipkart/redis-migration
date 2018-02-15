@@ -18,6 +18,7 @@ import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.rnorth.ducttape.unreliables.Unreliables;
+import redis.migration.config.ExporterConfig;
 
 /**
  * Created by s.aravind on 08/08/17.

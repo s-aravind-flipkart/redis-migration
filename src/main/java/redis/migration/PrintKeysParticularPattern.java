@@ -14,6 +14,7 @@ import com.lambdaworks.redis.cluster.api.sync.RedisAdvancedClusterCommands;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.rnorth.ducttape.unreliables.Unreliables;
+import redis.migration.config.ExporterConfig;
 
 import java.io.File;
 import java.util.concurrent.TimeUnit;

@@ -3,17 +3,15 @@ package redis.migration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.lambdaworks.redis.*;
-import com.lambdaworks.redis.api.StatefulRedisConnection;
-import com.lambdaworks.redis.api.sync.RedisCommands;
 import com.lambdaworks.redis.cluster.ClusterClientOptions;
 import com.lambdaworks.redis.cluster.ClusterTopologyRefreshOptions;
 import com.lambdaworks.redis.cluster.RedisClusterClient;
 import com.lambdaworks.redis.cluster.api.StatefulRedisClusterConnection;
-import com.lambdaworks.redis.cluster.api.async.RedisAdvancedClusterAsyncCommands;
 import com.lambdaworks.redis.cluster.api.sync.RedisAdvancedClusterCommands;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.rnorth.ducttape.unreliables.Unreliables;
+import redis.migration.config.ExporterConfig;
 
 import java.io.File;
 import java.util.concurrent.TimeUnit;
